@@ -1,0 +1,13 @@
+# GAS / clasp関連の個人設定ファイルを無視
+.clasp.json
+clasp.json
+
+# Node.js 依存関係
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OSの一時ファイル
+.DS_Store
+Thumbs.db
