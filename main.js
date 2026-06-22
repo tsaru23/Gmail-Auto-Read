@@ -241,7 +241,14 @@ function createDefaultRulesSheet(spreadsheet) {
   
   // ヘッダーの作成
   sheet.appendRow(['種別 (Type)', 'キーワード (Pattern)', '一致方法 (MatchType)', '説明 (Description)', '有効にする (Active)']);
-  sheet.getRange(1, 1, 1, 5).setFontWeight('bold').setBackground('#d9e1f2').setHorizontalAlignment('center');
+  
+  // ヘッダーのスタイル調整
+  const headerRange = sheet.getRange(1, 1, 1, 5);
+  headerRange.setFontWeight('bold')
+             .setBackground('#d9e1f2')
+             .setHorizontalAlignment('center')
+             .setVerticalAlignment('middle');
+  sheet.setRowHeight(1, 28);
   
   // データの入力規則（プルダウン設定）
   const typeRule = SpreadsheetApp.newDataValidation()
@@ -280,7 +287,17 @@ function createDefaultRulesSheet(spreadsheet) {
   sheet.getRange('D4').setValue('就活関係の自動配信メール（一括既読化）');
   sheet.getRange('E4').setValue(false); // 安全のため最初は無効化
   
-  sheet.autoResizeColumns(1, 5);
+  // スタイル適用（中央揃えなど）
+  sheet.getRange('A2:A100').setHorizontalAlignment('center');
+  sheet.getRange('C2:C100').setHorizontalAlignment('center');
+  sheet.getRange('E2:E100').setHorizontalAlignment('center');
+  
+  // 列幅を明示的に指定して、プルダウン矢印が文字と重ならないようにする
+  sheet.setColumnWidth(1, 150); // 種別
+  sheet.setColumnWidth(2, 280); // キーワード
+  sheet.setColumnWidth(3, 150); // 一致方法
+  sheet.setColumnWidth(4, 280); // 説明
+  sheet.setColumnWidth(5, 120); // 有効にする
   
   // ヘルプシートの作成
   createHelpSheet(spreadsheet);
@@ -312,40 +329,92 @@ function createHelpSheet(spreadsheet) {
   }
   helpSheet = spreadsheet.insertSheet('使い方ヘルプ');
   
-  helpSheet.appendRow(['★ Gmail自動既読システム 使い方ヘルプ ★']);
-  helpSheet.getRange(1, 1).setFontSize(16).setFontWeight('bold').setFontColor('#1f4e78');
+  // タイトル行（セルの結合をして、A列幅に影響しないようにする）
+  helpSheet.getRange('A1:E1').merge().setValue('★ Gmail自動既読システム 使い方ヘルプ ★')
+           .setFontSize(16).setFontWeight('bold').setFontColor('#1f4e78')
+           .setVerticalAlignment('middle').setHorizontalAlignment('left');
+  helpSheet.setRowHeight(1, 35);
   
-  helpSheet.appendRow(['']);
-  helpSheet.appendRow(['このシステムは、「FilterRules」シートで設定したルールに従って、Gmailの未読メールを自動で既読にします。']);
-  helpSheet.appendRow(['AIに頼らなくても、以下のルール設定例を参考に「FilterRules」に自分で記入して管理することができます。']);
-  helpSheet.appendRow(['']);
+  // 説明文行（結合と折り返し）
+  helpSheet.getRange('A2:E2').merge().setValue('');
   
-  helpSheet.appendRow(['▼ 設定項目の説明']);
-  helpSheet.getRange(6, 1).setFontWeight('bold').setFontSize(12);
+  const descText = 'このシステムは、「FilterRules」シートで設定したルールに従って、Gmailの未読メールを自動で既読にします。\n' +
+                   'AIに頼らなくても、以下のルール設定例を参考に「FilterRules」に自分で記入して管理することができます。';
+  helpSheet.getRange('A3:E4').merge().setValue(descText)
+           .setWrap(true).setVerticalAlignment('top').setFontSize(10).setFontColor('#333333');
+  helpSheet.setRowHeight(3, 20);
+  helpSheet.setRowHeight(4, 20);
   
-  helpSheet.appendRow(['項目名', '設定方法', '説明']);
-  helpSheet.getRange(7, 1, 1, 3).setFontWeight('bold').setBackground('#d9e1f2');
-  helpSheet.appendRow(['種別', '「送信元(From)」「件名(Subject)」「本文(Body)」から選択', 'メールのどの部分を検査するかを決定します。']);
-  helpSheet.appendRow(['キーワード', 'メールアドレス、件名のキーワード、または本文のテキストを入力', '既読にしたい対象のテキストを入力します。']);
-  helpSheet.appendRow(['一致方法', '「完全一致(Exact)」「部分一致(Contains)」「正規表現(RegExp)」から選択', 'キーワードがどのように一致するかを決定します。通常は「部分一致」が一番簡単でおすすめです。']);
-  helpSheet.appendRow(['説明', '自由にテキストを入力', 'どのような目的で作成したルールかをメモとして残すことができます。']);
-  helpSheet.appendRow(['有効にする', 'チェックボックスをオン/オフ', 'チェックを入れるとこのルールが動作し、チェックを外すと動作を一時停止します。']);
+  // セクション1: 設定項目の説明
+  helpSheet.getRange('A6').setValue('▼ 設定項目の説明').setFontWeight('bold').setFontSize(12).setFontColor('#1f4e78');
   
-  helpSheet.appendRow(['']);
-  helpSheet.appendRow(['▼ よく使われるフィルタ設定の具体例']);
-  helpSheet.getRange(15, 1).setFontWeight('bold').setFontSize(12);
+  const headers1 = ['項目名', '設定方法', '説明'];
+  for (let i = 0; i < headers1.length; i++) {
+    helpSheet.getRange(7, i + 1).setValue(headers1[i]);
+  }
+  helpSheet.getRange('A7:C7').setFontWeight('bold').setBackground('#d9e1f2').setHorizontalAlignment('center');
   
-  helpSheet.appendRow(['目的', '種別', 'キーワード', '一致方法', '説明']);
-  helpSheet.getRange(16, 1, 1, 5).setFontWeight('bold').setBackground('#f2f2f2');
-  helpSheet.appendRow(['特定のメルマガを完全に既読化', '送信元(From)', 'info@nikki.ne.jp', '完全一致(Exact)', 'みんなのキャンパスなどの特定のアドレスを既読化']);
-  helpSheet.appendRow(['件名に特定の文字があるものを既読化', '件名(Subject)', '【広告】', '部分一致(Contains)', '件名に【広告】とつくものをすべて既読化']);
-  helpSheet.appendRow(['本文に「登録解除」があるものを既読化', '本文(Body)', '配信停止はこちら', '部分一致(Contains)', '本文に退会や配信停止の案内があるものを既読化']);
-  helpSheet.appendRow(['特定のドメインを一括既読化', '送信元(From)', '.*@mail\\.axol\\.jp', '正規表現(RegExp)', 'axol.jp ドメインの就活メールを一括既読化（※上級者向け）']);
-  helpSheet.appendRow(['大学の不要なイベントメールのみを既読化', '件名(Subject)', '(起業|キャンペーン|イベント|クイズ)', '正規表現(RegExp)', '大学の重要連絡（休講・補講）は残しつつ、不要なイベントのみを既読化（※上級者向け）']);
+  const items1 = [
+    ['種別', '「送信元(From)」「件名(Subject)」「本文(Body)」から選択', 'メールのどの部分を検査するかを決定します。'],
+    ['キーワード', 'メールアドレス、件名のキーワード、または本文のテキストを入力', '既読にしたい対象のテキストを入力します。'],
+    ['一致方法', '「完全一致(Exact)」「部分一致(Contains)」「正規表現(RegExp)」から選択', 'キーワードがどのように一致するかを決定します。通常は「部分一致」が一番簡単でおすすめです。'],
+    ['説明', '自由にテキストを入力', 'どのような目的で作成したルールかをメモとして残すことができます。'],
+    ['有効にする', 'チェックボックスをオン/オフ', 'チェックを入れるとこのルールが動作し、チェックを外すと動作を一時停止します。']
+  ];
   
-  helpSheet.getRange('A7:C12').setBorder(true, true, true, true, true, true);
-  helpSheet.getRange('A16:E21').setBorder(true, true, true, true, true, true);
-  helpSheet.autoResizeColumns(1, 5);
+  for (let r = 0; r < items1.length; r++) {
+    for (let c = 0; c < items1[r].length; c++) {
+      helpSheet.getRange(8 + r, c + 1).setValue(items1[r][c]);
+    }
+  }
+  
+  // 設定項目の説明テーブルに枠線を引く＆テキスト折り返し
+  const descTableRange = helpSheet.getRange('A7:C12');
+  descTableRange.setBorder(true, true, true, true, true, true, '#ccc', SpreadsheetApp.BorderStyle.SOLID);
+  descTableRange.setWrap(true).setVerticalAlignment('middle');
+  
+  // セクション2: フィルタ設定の具体例
+  helpSheet.getRange('A14').setValue('▼ よく使われるフィルタ設定の具体例').setFontWeight('bold').setFontSize(12).setFontColor('#1f4e78');
+  
+  const headers2 = ['目的', '種別', 'キーワード', '一致方法', '説明'];
+  for (let i = 0; i < headers2.length; i++) {
+    helpSheet.getRange(15, i + 1).setValue(headers2[i]);
+  }
+  helpSheet.getRange('A15:E15').setFontWeight('bold').setBackground('#f2f2f2').setHorizontalAlignment('center');
+  
+  const items2 = [
+    ['特定のメルマガを完全に既読化', '送信元(From)', 'info@nikki.ne.jp', '完全一致(Exact)', 'みんなのキャンパスなどの特定のアドレスを既読化'],
+    ['件名に特定の文字があるものを既読化', '件名(Subject)', '【広告】', '部分一致(Contains)', '件名に【広告】とつくものをすべて既読化'],
+    ['本文に特定の文字があるものを既読化', '本文(Body)', '配信停止はこちら', '部分一致(Contains)', '本文に退会や配信停止の案内があるものを既読化'],
+    ['特定のドメインを一括既読化', '送信元(From)', '.*@mail\\.axol\\.jp', '正規表現(RegExp)', 'axol.jp ドメインの就活メールを一括既読化（※上級者向け）'],
+    ['大学の不要なイベントメールのみを既読化', '件名(Subject)', '(起業|キャンペーン|イベント|クイズ)', '正規表現(RegExp)', '大学の重要連絡（休講・補講）は残しつつ、不要なイベントのみを既読化（※上級者向け）']
+  ];
+  
+  for (let r = 0; r < items2.length; r++) {
+    for (let c = 0; c < items2[r].length; c++) {
+      helpSheet.getRange(16 + r, c + 1).setValue(items2[r][c]);
+    }
+  }
+  
+  // 具体例テーブルに枠線を引く＆テキスト折り返し
+  const exampleTableRange = helpSheet.getRange('A15:E20');
+  exampleTableRange.setBorder(true, true, true, true, true, true, '#ccc', SpreadsheetApp.BorderStyle.SOLID);
+  exampleTableRange.setWrap(true).setVerticalAlignment('middle');
+  
+  // 表の各行の高さを少し広げて見やすくする
+  for (let row = 7; row <= 12; row++) {
+    helpSheet.setRowHeight(row, 24);
+  }
+  for (let row = 15; row <= 20; row++) {
+    helpSheet.setRowHeight(row, 24);
+  }
+  
+  // 列幅を明示的に指定して折り返しがきれいに収まるようにする
+  helpSheet.setColumnWidth(1, 160); // 項目名 / 目的
+  helpSheet.setColumnWidth(2, 140); // 設定方法 / 種別
+  helpSheet.setColumnWidth(3, 260); // 説明 / キーワード
+  helpSheet.setColumnWidth(4, 140); // 一致方法
+  helpSheet.setColumnWidth(5, 260); // 説明
 }
 
 /**
