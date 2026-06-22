@@ -270,21 +270,21 @@ function createDefaultRulesSheet(spreadsheet) {
   
   // サンプルの設定
   sheet.getRange('A2').setValue('送信元(From)');
-  sheet.getRange('B2').setValue('info@nikki.ne.jp');
+  sheet.getRange('B2').setValue('newsletter@example.com');
   sheet.getRange('C2').setValue('完全一致(Exact)');
-  sheet.getRange('D2').setValue('みんなのキャンパスのメルマガを既読にする');
+  sheet.getRange('D2').setValue('特定のメルマガを完全に既読化');
   sheet.getRange('E2').setValue(true); // 最初から有効化しておく
   
   sheet.getRange('A3').setValue('件名(Subject)');
-  sheet.getRange('B3').setValue('(起業|クラブオフ|イベント|キャンペーン|おしゃべり|クイズ)');
+  sheet.getRange('B3').setValue('(イベント|キャンペーン|アンケート|広告)');
   sheet.getRange('C3').setValue('正規表現(RegExp)');
-  sheet.getRange('D3').setValue('大学からの不要なイベント・広告メール');
+  sheet.getRange('D3').setValue('特定のキーワードを含む不要なメールのみを既読化');
   sheet.getRange('E3').setValue(true); // 最初から有効化しておく
 
   sheet.getRange('A4').setValue('送信元(From)');
-  sheet.getRange('B4').setValue('.*@mail\\.axol\\.jp');
+  sheet.getRange('B4').setValue('.*@spam\\.example\\.net');
   sheet.getRange('C4').setValue('正規表現(RegExp)');
-  sheet.getRange('D4').setValue('就活関係の自動配信メール（一括既読化）');
+  sheet.getRange('D4').setValue('特定のドメインからの自動配信メールを一括既読化');
   sheet.getRange('E4').setValue(false); // 安全のため最初は無効化
   
   // スタイル適用（中央揃えなど）
@@ -383,11 +383,11 @@ function createHelpSheet(spreadsheet) {
   helpSheet.getRange('A15:E15').setFontWeight('bold').setBackground('#f2f2f2').setHorizontalAlignment('center');
   
   const items2 = [
-    ['特定のメルマガを完全に既読化', '送信元(From)', 'info@nikki.ne.jp', '完全一致(Exact)', 'みんなのキャンパスなどの特定のアドレスを既読化'],
+    ['特定のメルマガを完全に既読化', '送信元(From)', 'newsletter@example.com', '完全一致(Exact)', '特定のメルマガからのメールを完全に既読化'],
     ['件名に特定の文字があるものを既読化', '件名(Subject)', '【広告】', '部分一致(Contains)', '件名に【広告】とつくものをすべて既読化'],
     ['本文に特定の文字があるものを既読化', '本文(Body)', '配信停止はこちら', '部分一致(Contains)', '本文に退会や配信停止の案内があるものを既読化'],
-    ['特定のドメインを一括既読化', '送信元(From)', '.*@mail\\.axol\\.jp', '正規表現(RegExp)', 'axol.jp ドメインの就活メールを一括既読化（※上級者向け）'],
-    ['大学の不要なイベントメールのみを既読化', '件名(Subject)', '(起業|キャンペーン|イベント|クイズ)', '正規表現(RegExp)', '大学の重要連絡（休講・補講）は残しつつ、不要なイベントのみを既読化（※上級者向け）']
+    ['特定のドメインを一括既読化', '送信元(From)', '.*@spam\\.example\\.net', '正規表現(RegExp)', '特定のドメインからのメールを一括既読化（※上級者向け）'],
+    ['特定のキーワードを含むメールのみを既読化', '件名(Subject)', '(イベント|キャンペーン|アンケート|広告)', '正規表現(RegExp)', '重要な連絡は残しつつ、特定のキーワードを含む不要なメールのみを既読化（※上級者向け）']
   ];
   
   for (let r = 0; r < items2.length; r++) {
