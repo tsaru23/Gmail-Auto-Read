@@ -214,6 +214,22 @@ function logToSpreadsheet(spreadsheet, from, subject, rule) {
  * デフォルトのルールシートおよびヘルプシートを作成する
  */
 function createDefaultRulesSheet(spreadsheet) {
+  // 直接実行された場合など、引数がない場合はスクリプトプロパティから開く
+  if (!spreadsheet) {
+    const properties = PropertiesService.getScriptProperties();
+    const spreadsheetId = properties.getProperty('SPREADSHEET_ID');
+    if (!spreadsheetId) {
+      console.error('エラー: スクリプトプロパティ「SPREADSHEET_ID」が設定されていません。');
+      return;
+    }
+    try {
+      spreadsheet = SpreadsheetApp.openById(spreadsheetId);
+    } catch (e) {
+      console.error('エラー: 指定されたスプレッドシートを開くことができませんでした。', e.toString());
+      return;
+    }
+  }
+
   let sheet = spreadsheet.getSheetByName('FilterRules');
   const isNew = !sheet;
   
