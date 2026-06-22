@@ -290,6 +290,22 @@ function createDefaultRulesSheet(spreadsheet) {
  * 使い方ヘルプシートを作成する
  */
 function createHelpSheet(spreadsheet) {
+  // 直接実行された場合など、引数がない場合はスクリプトプロパティから開く
+  if (!spreadsheet) {
+    const properties = PropertiesService.getScriptProperties();
+    const spreadsheetId = properties.getProperty('SPREADSHEET_ID');
+    if (!spreadsheetId) {
+      console.error('エラー: スクリプトプロパティ「SPREADSHEET_ID」が設定されていません。');
+      return;
+    }
+    try {
+      spreadsheet = SpreadsheetApp.openById(spreadsheetId);
+    } catch (e) {
+      console.error('エラー: 指定されたスプレッドシートを開くことができませんでした。', e.toString());
+      return;
+    }
+  }
+
   let helpSheet = spreadsheet.getSheetByName('使い方ヘルプ');
   if (helpSheet) {
     spreadsheet.deleteSheet(helpSheet); // 常に最新の状態に更新
